@@ -1,0 +1,155 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class UrlShortener {
+
+    // In-memory storage for URL mappings
+    private Map<String, String> urlMap = new HashMap<>();
+    private String domain;
+    private int counter;
+
+    // Constructor
+    public UrlShortener(String domain) {
+        this.domain = domain;
+        this.counter = 1;
+    }
+
+    // Method to generate a short URL
+    public String shortenUrl(String longUrl) {
+        String shortUrl = domain + "/" + encode(counter);
+        urlMap.put(shortUrl, longUrl);
+        counter++;
+        return shortUrl;
+    }
+
+    // Method to get the original long URL
+    public String getLongUrl(String shortUrl) {
+        return urlMap.get(shortUrl);
+    }
+
+    // Encode the counter into a short string
+    private String encode(int num) {
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        StringBuilder encoded = new StringBuilder();
+        while (num > 0) {
+            encoded.append(chars[num % 62]);
+            num /= 62;
+        }
+        return encoded.reverse().toString();
+    }
+
+    public static void main(String[] args) {
+        UrlShortener urlShortener = new UrlShortener("http://short.ly");
+
+        // Shorten some URLs
+        String shortUrl1 = urlShortener.shortenUrl("https://www.example.com/some/very/long/url");
+        String shortUrl2 = urlShortener.shortenUrl("https://www.anotherexample.com/another/long/url");
+
+        // Output the shortened URLs
+        System.out.println("Shortened URL 1: " + shortUrl1);
+        System.out.println("Shortened URL 2: " + shortUrl2);
+
+        // Retrieve the original URLs
+        System.out.println("Original URL 1: " + urlShortener.getLongUrl(shortUrl1));
+        System.out.println("Original URL 2: " + urlShortener.getLongUrl(shortUrl2));
+    }
+}
+@RestController
+@RequestMapping("/api")
+public class UrlShortenerController {
+
+    @Autowired
+    private UrlShortenerService urlShortenerService;
+
+    @PostMapping("/shorten")
+    public String shortenUrl(@RequestBody String longUrl) {
+        return urlShortenerService.shortenUrl(longUrl);
+    }
+
+    @GetMapping("/{shortUrl}")
+    public ResponseEntity<Void> redirect(@PathVariable String shortUrl, HttpServletResponse response) throws IOException {
+        String longUrl = urlShortenerService.getLongUrl(shortUrl);
+        if (longUrl != null) {
+            response.sendRedirect(longUrl);
+            return ResponseEntity.status(HttpStatus.FOUND).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+}
+@Service
+public class UrlShortenerService {
+
+    @Autowired
+    private UrlRepository urlRepository;
+
+    private String domain = "http://short.ly";
+    private AtomicInteger counter = new AtomicInteger(1);
+
+    public String shortenUrl(String longUrl) {
+        String shortUrl = domain + "/" + encode(counter.getAndIncrement());
+        Url url = new Url(shortUrl, longUrl);
+        urlRepository.save(url);
+        return shortUrl;
+    }
+
+    public String getLongUrl(String shortUrl) {
+        Url url = urlRepository.findByShortUrl(shortUrl);
+        return url != null ? url.getLongUrl() : null;
+    }
+
+    private String encode(int num) {
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        StringBuilder encoded = new StringBuilder();
+        while (num > 0) {
+            encoded.append(chars[num % 62]);
+            num /= 62;
+        }
+        return encoded.reverse().toString();
+    }
+}
+public interface UrlRepository extends JpaRepository<Url, Long> {
+    Url findByShortUrl(String shortUrl);
+}
+@Entity
+public class Url {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String shortUrl;
+    private String longUrl;
+
+    // Constructors, getters, and setters
+    public Url() {}
+
+    public Url(String shortUrl, String longUrl) {
+        this.shortUrl = shortUrl;
+        this.longUrl = longUrl;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getShortUrl() {
+        return shortUrl;
+    }
+
+    public void setShortUrl(String shortUrl) {
+        this.shortUrl = shortUrl;
+    }
+
+    public String getLongUrl() {
+        return longUrl;
+    }
+
+    public void setLongUrl(String longUrl) {
+        this.longUrl = longUrl;
+    }
+}
