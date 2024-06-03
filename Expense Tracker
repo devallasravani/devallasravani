@@ -7,66 +7,54 @@ import java.util.Scanner;
     private String description;
     private String category;
     private double amount;
-
     public Expense(LocalDate date, String description, String category, double amount) {
         this.date = date;
         this.description = description;
         this.category = category;
         this.amount = amount;
     }
-
-    public LocalDate getDate() {
+   public LocalDate getDate() {
         return date;
     }
-
     public String getDescription() {
         return description;
-    }
-
-    public String getCategory() {
+    } 
+   public String getCategory() {
         return category;
     }
-
     public double getAmount() {
         return amount;
     }
-
-    @Override
+   @Override
     public String toString() {
         return "Date: " + date + ", Description: " + description + ", Category: " + category + ", Amount: " + amount;
     }
 }
-
 public class ExpenseTracker {
     private List<Expense> expenses;
 
     public ExpenseTracker() {
         this.expenses = new ArrayList<>();
     }
-
-    public void addExpense(Expense expense) {
+  public void addExpense(Expense expense) {
         expenses.add(expense);
     }
-
-    public void showExpenses() {
+   public void showExpenses() {
         for (Expense expense : expenses) {
             System.out.println(expense);
         }
     }
-
-    public static void main(String[] args) {
+   public static void main(String[] args) {
         ExpenseTracker tracker = new ExpenseTracker();
         Scanner scanner = new Scanner(System.in);
-
-        while (true) {
+      while (true) {
             System.out.println("1. Add Expense");
             System.out.println("2. Show Expenses");
             System.out.println("3. Exit");
             System.out.print("Choose an option: ");
             int option = scanner.nextInt();
             scanner.nextLine();  // Consume newline
-
-            if (option == 1) {
+       if (option == 1) {
                 System.out.print("Enter date (YYYY-MM-DD): ");
                 String dateStr = scanner.nextLine();
                 LocalDate date = LocalDate.parse(dateStr);
