@@ -58,20 +58,15 @@ public class ExpenseTracker {
                 System.out.print("Enter date (YYYY-MM-DD): ");
                 String dateStr = scanner.nextLine();
                 LocalDate date = LocalDate.parse(dateStr);
-
                 System.out.print("Enter description: ");
                 String description = scanner.nextLine();
-
                 System.out.print("Enter category: ");
                 String category = scanner.nextLine();
-
                 System.out.print("Enter amount: ");
                 double amount = scanner.nextDouble();
                 scanner.nextLine();  // Consume newline
-
                 Expense expense = new Expense(date, description, category, amount);
                 tracker.addExpense(expense);
-
             } else if (option == 2) {
                 tracker.showExpenses();
             } else if (option == 3) {
@@ -80,7 +75,6 @@ public class ExpenseTracker {
                 System.out.println("Invalid option, please try again.");
             }
         }
-
-        scanner.close();
+scanner.close();
     }
 }
