@@ -1,0 +1,114 @@
+import java.util.*;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Scanner;
+public class Main {
+    public static void main(String[] args) {
+        Game game = new Game();
+        game.start();
+    }
+}
+
+public class Room {
+    private String description;
+    private HashMap<String, Room> exits;
+
+    public Room(String description) {
+        this.description = description;
+        this.exits = new HashMap<>();
+    }
+
+    public void setExit(String direction, Room neighbor) {
+        exits.put(direction, neighbor);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Room getExit(String direction) {
+        return exits.get(direction);
+    }
+}
+
+public class Player {
+    private Room currentRoom;
+    private ArrayList<String> inventory;
+
+    public Player(Room startingRoom) {
+        currentRoom = startingRoom;
+        inventory = new ArrayList<>();
+    }
+
+    public Room getCurrentRoom() {
+        return currentRoom;
+    }
+
+    public void setCurrentRoom(Room room) {
+        currentRoom = room;
+    }
+
+    public void addItem(String item) {
+        inventory.add(item);
+    }
+
+    public boolean hasItem(String item) {
+        return inventory.contains(item);
+    }
+}
+public class Game {
+    private Player player;
+
+    public void start() {
+        // Create rooms
+        Room room1 = new Room("You are in a forest.");
+        Room room2 = new Room("You are in a cave.");
+        Room room3 = new Room("You are on a mountain.");
+
+        // Set exits
+        room1.setExit("north", room2);
+        room2.setExit("south", room1);
+        room2.setExit("up", room3);
+        room3.setExit("down", room2);
+
+        // Initialize player
+        player = new Player(room1);
+
+        // Game loop
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println(player.getCurrentRoom().getDescription());
+            System.out.print("> ");
+            String command = scanner.nextLine();
+            processCommand(command);
+        }
+    }
+
+    private void processCommand(String command) {
+        String[] words = command.split(" ");
+        String verb = words[0];
+
+        switch (verb) {
+            case "go":
+                if (words.length < 2) {
+                    System.out.println("Go where?");
+                } else {
+                    String direction = words[1];
+                    Room nextRoom = player.getCurrentRoom().getExit(direction);
+                    if (nextRoom != null) {
+                        player.setCurrentRoom(nextRoom);
+                    } else {
+                        System.out.println("You can't go that way.");
+                    }
+                }
+                break;
+            case "quit":
+                System.out.println("Thanks for playing!");
+                System.exit(0);
+                break;
+            default:
+                System.out.println("I don't understand that command.");
+                break;
+        }
+    }
+}
